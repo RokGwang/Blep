@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Team Tennis 대시보드</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="header header--top">
+    <h1>Team Tennis. Make better class.</h1>
+  </header>
+
+  <header class="header header--main">
+    <h1>K-Tennis</h1>
+    
+    <div class="menu-toggle" id="menuToggle">
+      <div class="menu-toggle__bar"></div>
+      <div class="menu-toggle__bar"></div>
+      <div class="menu-toggle__bar"></div>
+    </div>
+    
+    <div class="main-buttons">
+      <button class="text-btn main-buttons__btn active" id="btn_live">실시간</button>
+      <button class="text-btn main-buttons__btn" id="btn_predict">예측</button>
+      <button class="text-btn main-buttons__btn" id="btn_analysis">데이터 분석</button>
+    </div>
+  </header>
+
+  <nav class="sidebar" id="sideNav">
+    <ul class="sidebar__menu">
+      <li class="menu-group">
+        <div class="menu-group__title">멀티미디어</div>
+        <ul class="submenu open">
+          <li><button class="submenu__btn">M501(준비중)</button></li>
+          <li><button class="submenu__btn">M502</button></li>
+          <li><button class="submenu__btn">M504</button></li>
+        </ul>
+      </li>
+      <li class="menu-group">
+        <div class="menu-group__title">의료과학관</div>
+        <ul class="submenu open">
+          <li><button class="submenu__btn">1502</button></li>
+          <li><button class="submenu__btn">1504</button></li>
+          <li><button class="submenu__btn">1506</button></li>
+        </ul>
+      </li>
+      <li class="menu-group">
+        <div class="menu-group__title">미디어랩스</div>
+        <ul class="submenu open">
+          <li><button class="submenu__btn">ML416</button></li>
+          <li><button class="submenu__btn">ML417</button></li>
+          <li><button class="submenu__btn">ML418</button></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+
+  <main class="main-content" id="mainContent">
+    </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

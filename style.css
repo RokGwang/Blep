@@ -1,0 +1,503 @@
+/* ==================== CSS Custom Properties (변수) ==================== */
+:root {
+  --color-primary-blue: #0077ff;
+  --color-primary-red: #b34747;
+  --color-text-dark: #333;
+  --color-background-light: rgb(243, 243, 243);
+  --header-height-top: 100px;
+  --header-height-main: 70px;
+  --sidebar-width: 280px;
+  --header-total-height: calc(var(--header-height-top) + var(--header-height-main));
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  color: var(--color-text-dark);
+}
+
+/* ==================== 헤더 ==================== */
+.header {
+  position: fixed;
+  left: 0;
+  width: 100%;
+  padding-left: 20px;
+  display: flex;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* 상단 헤더 (header1) */
+.header--top {
+  top: 0;
+  height: var(--header-height-top);
+  background-color: #000;
+  color: white;
+}
+
+/* 메인 헤더 (header2) */
+.header--main {
+  top: var(--header-height-top);
+  height: var(--header-height-main);
+  background-color: white;
+  border-bottom: 1px solid #ccc;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  z-index: 999;
+  gap: 20px;
+}
+
+/* 메뉴 토글 버튼 */
+.menu-toggle {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  margin: 0 10px;
+}
+.menu-toggle__bar {
+  width: 100%;
+  height: 3px;
+  background-color: var(--color-text-dark);
+  border-radius: 2px;
+  transition: background-color 0.2s ease;
+}
+.menu-toggle.active .menu-toggle__bar {
+  background-color: var(--color-primary-blue);
+}
+
+/* 헤더2 버튼 */
+.main-buttons {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin-left: 100px;
+}
+.text-btn {
+  background: none;
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  color: var(--color-text-dark);
+  transition: color 0.2s ease;
+}
+.text-btn:hover {
+  color: var(--color-primary-blue);
+}
+/* '실시간' 버튼의 특별한 색상 제거 - active 스타일과 통일 */
+.main-buttons__btn.active {
+  color: var(--color-primary-blue);
+  font-weight: bold;
+}
+
+/* ==================== 네비게이션 (Sidebar) ==================== */
+.sidebar {
+  position: fixed;
+  top: var(--header-total-height);
+  left: 0;
+  width: var(--sidebar-width);
+  height: calc(100% - var(--header-total-height));
+  background-color: white;
+  padding-top: 20px;
+  border-right: 1px solid #ccc;
+  transition: transform 0.3s ease;
+  z-index: 900;
+  overflow-y: auto;
+}
+.sidebar.hidden {
+  transform: translateX(-100%);
+}
+.sidebar__menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.menu-group {
+  display: flex;
+  flex-direction: column;
+}
+.menu-group__title {
+  font-weight: bold;
+  font-size: 16px;
+  padding: 10px 20px;
+  color: var(--color-primary-blue);
+}
+.submenu {
+  display: flex;
+  flex-direction: column;
+  max-height: 500px; /* 임시 높이 */
+  padding: 0;
+}
+.submenu li {
+  margin: 5px 0;
+  padding-left: 40px;
+}
+.submenu__btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  padding: 6px 12px;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+.submenu__btn:hover {
+  color: var(--color-primary-blue);
+}
+
+/* ==================== 메인 콘텐츠 ==================== */
+.main-content {
+  margin-top: var(--header-total-height);
+  margin-left: var(--sidebar-width); /* JavaScript에서 제어 */
+  padding: 20px;
+  background-color: var(--color-background-light);
+  min-height: calc(100vh - var(--header-total-height));
+  transition: margin-left 0.3s ease;
+  overflow-x: hidden;
+}
+
+/* 이미지 + 텍스트 섹션 */
+.section-header {
+  display: flex;
+  align-items: stretch;
+  gap: 40px;
+  margin-bottom: 40px;
+}
+.section-header__image {
+  width: 100px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+.section-header__text-group {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.section-header__text--large {
+  font-size: 20px;
+  font-weight: bold;
+}
+.section-header__text--medium {
+  font-size: 14px;
+  opacity: 0.8;
+  margin-top: 5px;
+}
+.section-header__text--small {
+  font-size: 12px;
+  opacity: 0.6;
+  margin-top: 5px;
+}
+
+
+/* ==================== 센서 버튼 컨테이너 ==================== */
+.sensor-button-group {
+  display: flex;
+  gap: 40px;
+  max-width: 1050px;
+  flex-wrap: wrap; /* 반응형 대비 */
+}
+
+/* 예측 목록 스타일 */
+.prediction-list {
+  display: flex;
+  flex-direction: column; /* 카드를 수직으로 쌓음 */
+  gap: 40px; /* 카드 사이 간격 */
+  max-width: 1000px; /* 카드 목록의 최대 너비 제한 (한 칸에 하나씩 보이도록) */
+}
+
+.prediction-list .info-card {
+    margin-top: 0;
+}
+
+/* 버튼 간격 */
+.button-spacer {
+  height: 40px;
+}
+
+/* 개별 센서 버튼 스타일 */
+.sensor-btn {
+  flex: 1;
+  min-width: 250px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  padding: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+}
+.sensor-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+}
+.sensor-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.btn__left-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.btn__right-content {
+  text-align: right;
+  font-weight: bold;
+}
+.btn__text--title {
+  font-size: 18px;
+  font-weight: bold;
+}
+.btn__text--subtitle {
+  font-size: 14px;
+  opacity: 0.8;
+}
+.btn__text--value {
+  font-size: 24px;
+}
+
+/* 색상 그라데이션 */
+.btn--purple {
+  /* PM10 Sensor (기존 btn-red) */
+  background: linear-gradient(to right, #3b2a6f, #6b4eb3, #3b2a6f);
+}
+.btn--sky-blue {
+  /* CO2 Sensor (기존 btn-green) */
+  background: linear-gradient(to right, #3377aa, #66a8d9, #3377aa);
+}
+.btn--green {
+  /* Temperature (기존 btn-blue) */
+  background: linear-gradient(to right, #288052, #53c789, #288052);
+}
+.btn--red {
+  /* PM25 Sensor (기존 btn-red2) */
+  background: linear-gradient(to right, #b32d2d, #e64a4a, #b32d2d);
+}
+.btn--orange {
+  /* TVOC Sensor */
+  background: linear-gradient(to right, #e68a00, #ffb84d, #e68a00);
+}
+.btn--white {
+  /* Humidity */
+  background: linear-gradient(to right, #ffffff, #f2f2f2, #ffffff);
+  color: var(--color-text-dark);
+}
+
+/* ==================== AI 추천/예측 카드 (White Square) ==================== */
+.info-card {
+  min-width: 300px;
+  max-width: 990px;
+  width: 100%; 
+  background-color: white;
+  margin-top: 50px;
+  padding: 30px; /* 50px -> 30px로 수정 */
+  border-radius: 3px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.card-content-wrapper {
+    display: flex;
+    width: 100%;
+    gap: 30px; /* 좌우 컨텐츠 사이의 간격 */
+    align-items: flex-start; /* 컨텐츠가 위에서부터 시작하도록 정렬 */
+}
+
+.card__title--left {
+  align-self: flex-start;
+  font-weight: bold;
+  font-size: 16px;
+  color: var(--color-text-dark);
+}
+.card__image--main {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+.card__image--predict {
+  width: 100%;
+  height: 350px;
+  object-fit: contain;
+  border-radius: 5px;
+}
+
+.card__text-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-top: 5px;
+}
+.card__text--title {
+  font-weight: bold;
+  font-size: 14px;
+}
+.card__text--content {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+/* ==================== 막대 그래프 컴포넌트 (수정됨) ==================== */
+.bar-chart-container {
+    flex: 1 1 50%; /* 왼쪽 절반 (50%) 차지 */
+    min-width: 300px;
+    height: 300px; 
+    /* 기존 스타일 유지: 아래의 bar-chart-content를 새로 만들어 Flexbox를 분리 */
+    display: flex;
+    flex-direction: column; /* 제목과 그래프를 수직으로 배치 */
+    padding: 0; /* padding 제거 */
+    border-bottom: none; /* 하단 border 제거 */
+    gap: 10px;
+}
+
+/* 🚀 새로 추가: 막대 그래프 제목과 그래프를 감싸는 내부 컨테이너 */
+.bar-chart-visuals {
+    flex-grow: 1; /* 남은 공간을 채움 */
+    display: flex;
+    align-items: flex-end; /* 막대가 아래에서 위로 올라오도록 설정 */
+    padding: 10px 0;
+    border-bottom: 2px solid #ccc; /* X축 */
+    gap: 15px;
+    justify-content: space-around;
+    width: 100%;
+}
+
+.bar-chart__bar-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 40px;
+    /* 🚀 핵심 수정: 부모 높이를 100%로 지정해야 자식(.bar-chart__bar)의 height: N%가 정상 작동 */
+    height: 100%; 
+    justify-content: flex-end; /* 막대와 레이블을 아래쪽으로 정렬 */
+}
+
+.bar-chart__value {
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--color-text-dark);
+    /* 수치를 상단에 고정하고, 막대 영역 밖으로 벗어나지 않도록 padding이나 margin을 조정할 수 있습니다. */
+    height: 15px; /* 공간 확보 */
+}
+
+.bar-chart__bar {
+    width: 100%;
+    background-color: var(--color-primary-blue);
+    transition: height 0.5s ease;
+    border-radius: 3px 3px 0 0;
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+    align-self: flex-end;
+}
+
+.bar-chart__label {
+    /* 막대와 레이블 사이의 간격을 조절 */
+    margin-top: 5px;
+    font-size: 10px;
+    color: #777;
+    white-space: nowrap;
+}
+
+.right-comparison-group {
+    flex: 1 1 20%; /* 오른쪽 절반 (50%) 차지 */
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding-top: 10px; /* 제목 높이만큼 아래로 내리기 (선택 사항) */
+}
+
+.small-info-card {
+    background-color: var(--color-background-light); /* 연한 배경색 */
+    padding: 10px;
+    border-radius: 3px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    min-height: 80px; /* 적당한 최소 높이 */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.small-info-card__title {
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--color-primary-blue);
+    margin-bottom: 5px;
+}
+
+.small-info-card__content {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* ==================== Large Stat Card 스타일 ==================== */
+
+/* 큰 직사각형 카드 */
+.large-stat-card {
+    /* info-card와 비슷한 기본 스타일 */
+    background-color: white;
+    border-radius: 5px;
+    min-width: 300px;
+    max-width: 1000px;
+    padding: 20px 25px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin-top: 40px; /* 센서 버튼 그룹과 info-card 사이의 간격 */
+    margin-bottom: 25px; /* info-card와의 간격 */
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* 카드 내용 (값과 레이블 그룹) */
+.large-stat-card__content {
+    display: flex;
+    justify-content: space-around; /* 내부 요소를 넓게 분산 */
+    align-items: center;
+    padding: 10px 0;
+}
+
+/* 개별 통계 항목 */
+.stat-item {
+    text-align: center;
+}
+
+.stat-item__value {
+    font-size: 2.5rem; /* 더 큰 글꼴 */
+    font-weight: 700;
+    color: var(--color-green); /* 예시 색상: IAQ 값에 따라 변경 가능 */
+    line-height: 1.2;
+}
+
+.stat-item--recommendation .stat-item__value {
+    font-size: 1.8rem;
+    color: var(--color-sky-blue);
+}
+
+.stat-item__label {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    margin-top: 5px;
+    font-weight: 500;
+}
+
+/* (선택 사항) 모바일 반응형 */
+@media (max-width: 768px) {
+    .large-stat-card__content {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .stat-item {
+        width: 100%;
+    }
+}
