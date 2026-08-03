@@ -15,6 +15,8 @@ let tempValueElement;
 let pm25ValueElement;
 let tvocValueElement;
 let humValueElement;
+
+
 let sensorFetchInterval;
 
 // 막대 그래프 요소 (추가됨)
@@ -152,7 +154,7 @@ async function fetchAndDisplaySensorData() {
         // ------------------------------------------------------------
 
         // 실제 API 엔드포인트에 맞게 URL 수정 필요
-        const response = await fetch("airkorea2.php");
+        const response = await fetch("airkorea.php");
         const result = await response.json();
         const asanPm10Element = document.getElementById("asan_pm10");
         const asanPm25Element = document.getElementById("asan_pm25");
