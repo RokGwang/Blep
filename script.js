@@ -154,7 +154,7 @@ async function fetchAndDisplaySensorData() {
         // ------------------------------------------------------------
 
         // 실제 API 엔드포인트에 맞게 URL 수정 필요
-        const response = await fetch("insert.php");
+        const response = await fetch("airkorea2.php");
         const result = await response.json();
         const asanPm10Element = document.getElementById("asan_pm10");
         const asanPm25Element = document.getElementById("asan_pm25");
