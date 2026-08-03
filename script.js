@@ -15,8 +15,6 @@ let tempValueElement;
 let pm25ValueElement;
 let tvocValueElement;
 let humValueElement;
-
-
 let sensorFetchInterval;
 
 // 막대 그래프 요소 (추가됨)
