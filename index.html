@@ -32,9 +32,11 @@
       <li class="menu-group">
         <div class="menu-group__title">멀티미디어</div>
         <ul class="submenu open">
-          <li><button class="submenu__btn">M501(준비중)</button></li>
-          <li><button class="submenu__btn">M502</button></li>
-          <li><button class="submenu__btn">M504</button></li>
+          <li><button class="submenu__btn" data-location="M501">M501</button></li>
+          <!-- 🚀 M502에 현재 위치하므로 active 클래스 추가 -->
+          <li><button class="submenu__btn active" data-location="M502">M502</button></li>
+          <li><button class="submenu__btn" data-location="M507">M507</button></li>
+	  <li><button class="submenu__btn" data-location="M520">M520</button></li>
         </ul>
       </li>
       <li class="menu-group">
@@ -59,6 +61,6 @@
   <main class="main-content" id="mainContent">
     </main>
 
-  <script src="script.js"></script>
+  <script src="script2.js"></script>
 </body>
 </html>

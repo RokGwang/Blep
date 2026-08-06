@@ -144,6 +144,14 @@ body {
   width: 100%;
   text-align: left;
 }
+
+.submenu__btn.active {
+  color: var(--color-primary-blue);
+  font-weight: bold;
+  background-color: rgba(0, 119, 255, 0.08); /* 연한 파란색 배경 (선택사항) */
+  border-radius: 4px;
+}
+
 .submenu__btn:hover {
   color: var(--color-primary-blue);
 }
@@ -349,23 +357,28 @@ body {
 }
 
 /* ==================== 막대 그래프 컴포넌트 (수정됨) ==================== */
-.bar-chart-container {
-    flex: 1 1 50%; /* 왼쪽 절반 (50%) 차지 */
-    min-width: 300px;
-    height: 300px; 
-    /* 기존 스타일 유지: 아래의 bar-chart-content를 새로 만들어 Flexbox를 분리 */
+.card-content-wrapper {
     display: flex;
-    flex-direction: column; /* 제목과 그래프를 수직으로 배치 */
-    padding: 0; /* padding 제거 */
-    border-bottom: none; /* 하단 border 제거 */
+    width: 100%;
+    gap: 30px;
+    align-items: stretch; /* 높이를 서로 맞추도록 변경 */
+}
+
+.bar-chart-container {
+    flex: 1 1 50%;
+    min-width: 300px;
+    height: 300px; /* 명시적 높이 */
+    display: flex;
+    flex-direction: column;
+    padding: 0; 
+    border-bottom: none; 
     gap: 10px;
 }
 
-/* 🚀 새로 추가: 막대 그래프 제목과 그래프를 감싸는 내부 컨테이너 */
 .bar-chart-visuals {
-    flex-grow: 1; /* 남은 공간을 채움 */
+    height: 220px; /* 제목 공간을 제외한 명시적 높이 */
     display: flex;
-    align-items: flex-end; /* 막대가 아래에서 위로 올라오도록 설정 */
+    align-items: flex-end;
     padding: 10px 0;
     border-bottom: 2px solid #ccc; /* X축 */
     gap: 15px;
@@ -378,17 +391,15 @@ body {
     flex-direction: column;
     align-items: center;
     width: 40px;
-    /* 🚀 핵심 수정: 부모 높이를 100%로 지정해야 자식(.bar-chart__bar)의 height: N%가 정상 작동 */
-    height: 100%; 
-    justify-content: flex-end; /* 막대와 레이블을 아래쪽으로 정렬 */
+    height: 100%; /* 부모(.bar-chart-visuals)의 220px를 온전히 상속 */
+    justify-content: flex-end;
 }
 
 .bar-chart__value {
     font-size: 11px;
     font-weight: bold;
     color: var(--color-text-dark);
-    /* 수치를 상단에 고정하고, 막대 영역 밖으로 벗어나지 않도록 padding이나 margin을 조정할 수 있습니다. */
-    height: 15px; /* 공간 확보 */
+    height: 15px;
 }
 
 .bar-chart__bar {
@@ -397,11 +408,10 @@ body {
     transition: height 0.5s ease;
     border-radius: 3px 3px 0 0;
     box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
-    align-self: flex-end;
+    /* height 속성이 JS에서 인라인 스타일로 동적 주입될 때 퍼센트가 정상 작동하도록 함 */
 }
 
 .bar-chart__label {
-    /* 막대와 레이블 사이의 간격을 조절 */
     margin-top: 5px;
     font-size: 10px;
     color: #777;
