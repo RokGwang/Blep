@@ -13,12 +13,12 @@ let sensorFetchInterval;
 
 // 아산시 API 호출 제한 관리 (10분에 1회 호출: 일일 약 144회로 트래픽 500회 제한 방어)
 let lastAirFetchTime = 0;
-const AIR_FETCH_INTERVAL = 10 * 60 * 1000; 
+const AIR_FETCH_INTERVAL = 10 * 60 * 1000;
 
-// 🚀 [추가] 현재 선택된 방 위치 저장 변수 (기본 M502)
-let currentLocation = 'M502'; 
+// 현재 선택된 방 위치 저장 변수 (기본 M502)
+let currentLocation = 'M502';
 
-// 🚀 [추가] 새로고침 전까지 사이트 내 이동 시 API 데이터를 보존하기 위한 캐시 변수
+// 새로고침 전까지 사이트 내 이동 시 API 데이터를 보존하기 위한 캐시 변수
 let cachedSensorData = null;
 let cachedAirData = null;
 let cachedIaqValues = { iaq: "--", temp: "--", recommendation: "분석 불가" };
@@ -41,13 +41,23 @@ const SENSOR_MAX = {
     temp: 50, humidity: 100
 };
 
+// 대시보드용 미니 아이콘 (currentColor를 사용해 카드 색상에 맞춰짐)
+const ICONS = {
+    pm10: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="7" cy="8" r="1.6"/><circle cx="13" cy="6" r="1.2"/><circle cx="17" cy="10" r="2"/><circle cx="9" cy="15" r="2.2"/><circle cx="16" cy="17" r="1.4"/></svg>`,
+    pm25: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="8" cy="9" r="1"/><circle cx="13" cy="7" r="0.8"/><circle cx="16" cy="11" r="1.2"/><circle cx="10" cy="14" r="1.3"/><circle cx="15" cy="16" r="0.9"/><circle cx="6" cy="15" r="0.7"/></svg>`,
+    co2: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17a4 4 0 1 1 1.2-7.8A5 5 0 0 1 17 11a3.5 3.5 0 0 1-.5 6.9H6Z"/></svg>`,
+    tvoc: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12c2-4 4 4 6 0s4 4 6 0s4 4 6 0"/></svg>`,
+    temp: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 14.5V5a2 2 0 1 1 4 0v9.5a4 4 0 1 1-4 0Z"/></svg>`,
+    humidity: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11Z"/></svg>`
+};
+
 // ==================== 초기 설정 및 공통 함수 ====================
 
 document.addEventListener("DOMContentLoaded", () => {
     sideNav.classList.remove('hidden');
     mainContent.style.marginLeft = getComputedStyle(sideNav).width;
     renderLiveDashboard();
-    
+
     // 시계 동작 초기화
     updateTime();
     setInterval(updateTime, 1000);
@@ -59,6 +69,12 @@ menuToggle.addEventListener('click', () => {
     menuToggle.classList.toggle('active');
     mainContent.style.marginLeft = sideNav.classList.contains('hidden') ? '0px' : getComputedStyle(sideNav).width;
 });
+menuToggle.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        menuToggle.click();
+    }
+});
 
 // 상단 헤더 활성화 버튼 변경
 function setActiveButton(activeBtn) {
@@ -69,7 +85,7 @@ function setActiveButton(activeBtn) {
 // 실시간 데이터 폴링 제어
 function startDataPolling() {
     stopDataPolling();
-    sensorFetchInterval = setInterval(fetchAndDisplaySensorData, 5000);
+    sensorFetchInterval = setInterval(fetchAndDisplaySensorData, 1800000);
     setTimeout(fetchAndDisplaySensorData, 100);
 }
 
@@ -102,7 +118,7 @@ function updateChartBars() {
 
         // 해당 센서의 화면 상단 숫자 텍스트 요소를 직접 찾아서 값을 읽어옵니다.
         const valueElement = valueElements.find(el => el.dataset.valueFor === sensorType);
-        
+
         if (valueElement && valueElement.textContent && valueElement.textContent !== "--") {
             // "µg/m³" 같은 단위 문자열이 섞여있어도 숫자만 추출하도록 정규식 처리 강화
             const cleanText = valueElement.textContent.replace(/[^0-9.]/g, '');
@@ -111,7 +127,7 @@ function updateChartBars() {
 
         const isValid = val !== null && !isNaN(val) && val >= 0;
         const pct = isValid ? Math.min((val / max) * 100, 100) : 0;
-        
+
         // 막대 높이 강제 적용
         bar.style.height = `${pct}%`;
     });
@@ -127,11 +143,11 @@ async function fetchAndDisplaySensorData() {
     }
 
     try {
-        // 🚀 [수정] 현재 선택된 방(currentLocation)에 따라 다른 PHP 파일을 동적으로 호출
+        // 현재 선택된 방(currentLocation)에 따라 다른 PHP 파일을 동적으로 호출
         let apiPath = "CSV/sensor.php"; // 기본 M502
         if (currentLocation === 'M501') apiPath = "CSV/sensor501.php";
         if (currentLocation === 'M507') apiPath = "CSV/sensor507.php";
-	if (currentLocation === 'M520') apiPath = "CSV/sensor520.php";
+        if (currentLocation === 'M520') apiPath = "CSV/sensor520.php";
 
         const sensorRes = await fetch(apiPath);
         const sensorResult = await sensorRes.json();
@@ -139,7 +155,7 @@ async function fetchAndDisplaySensorData() {
         if (sensorResult.success && sensorResult.data) {
             const data = sensorResult.data;
             cachedSensorData = data; // 실내 데이터 캐싱
-            
+
             sensorElements.pm10.textContent = data.pm10 ?? "--";
             sensorElements.co2.textContent = data.co2 ?? "--";
             sensorElements.temp.textContent = data.temperature ?? "--";
@@ -150,7 +166,7 @@ async function fetchAndDisplaySensorData() {
             // 실내 PM10, PM25 막대 상단 값 영역 반영
             const pm10ChartVal = document.querySelector('.bar-chart__value[data-value-for="pm10"]');
             const pm25ChartVal = document.querySelector('.bar-chart__value[data-value-for="pm25"]');
-            
+
             if (pm10ChartVal) pm10ChartVal.textContent = data.pm10 ?? "--";
             if (pm25ChartVal) pm25ChartVal.textContent = data.pm25 ?? "--";
 
@@ -199,10 +215,10 @@ async function fetchAndDisplaySensorData() {
 
                 const asanPm10ChartVal = document.querySelector('.bar-chart__value[data-value-for="asan_pm10"]');
                 const asanPm25ChartVal = document.querySelector('.bar-chart__value[data-value-for="asan_pm25"]');
-                
+
                 if (asanPm10ChartVal) asanPm10ChartVal.textContent = airData.asan_pm10 ?? "--";
                 if (asanPm25ChartVal) asanPm25ChartVal.textContent = airData.asan_pm25 ?? "--";
-                
+
                 lastAirFetchTime = currentTime;
             }
         }
@@ -223,61 +239,88 @@ function renderLiveDashboard() {
     setActiveButton(btnLive);
 
     mainContent.innerHTML = `
-        <section class="section-header">
-            <img src="https://marketplace.canva.com/zDhug/MAGx1pzDhug/1/tl/canva-cartoon-illustration-of-happy-yellow-chick-MAGx1pzDhug.png" alt="대표 이미지" class="section-header__image"/>
-            <div class="section-header__text-group">
-                <div class="section-header__text--large">실시간 정보</div>
-                <div class="section-header__text--medium">This is an example dashboard created using build-in elements and components.</div>
-                <div class="section-header__text--small">CodePen Home Full Free Bootstrap HTML Admin Dashboard Template</div>
+        <section class="page-header">
+            <div>
+                <h2 class="page-header__title">실시간 공기질</h2>
+                <p class="page-header__subtitle">선택한 강의실의 센서 데이터를 5초마다 갱신합니다.</p>
+            </div>
+            <div class="status-pill">
+                <span class="status-pill__dot"></span>
+                ${currentLocation} 측정 중
             </div>
         </section>
 
-        <section class="sensor-button-group">
-            <button class="sensor-btn btn--purple"><div class="btn__left-content"><div class="btn__text--title">PM10</div><div class="btn__text--subtitle">미세먼지</div></div><div class="btn__right-content"><div class="btn__text--value" id="pm10_val">--</div></div></button>
-            <button class="sensor-btn btn--sky-blue"><div class="btn__left-content"><div class="btn__text--title">CO2</div><div class="btn__text--subtitle">이산화탄소</div></div><div class="btn__right-content"><div class="btn__text--value" id="co2_val">--</div></div></button>
-            <button class="sensor-btn btn--green"><div class="btn__left-content"><div class="btn__text--title">Temperature</div><div class="btn__text--subtitle">온도</div></div><div class="btn__right-content"><div class="btn__text--value" id="temp_val">--</div></div></button>
-        </section>
-
-        <div class="button-spacer"></div>
-
-        <section class="sensor-button-group">
-            <button class="sensor-btn btn--red"><div class="btn__left-content"><div class="btn__text--title">PM25</div><div class="btn__text--subtitle">초미세먼지</div></div><div class="btn__right-content"><div class="btn__text--value" id="pm25_val">--</div></div></button>
-            <button class="sensor-btn btn--orange"><div class="btn__left-content"><div class="btn__text--title">TVOC</div><div class="btn__text--subtitle">휘발성 유기화합물</div></div><div class="btn__right-content"><div class="btn__text--value" id="tvoc_val">--</div></div></button>
-            <button class="sensor-btn btn--white"><div class="btn__left-content"><div class="btn__text--title">Humidity</div><div class="btn__text--subtitle">습도</div></div><div class="btn__right-content"><div class="btn__text--value" id="hum_val">--</div></div></button>
-        </section>
-
-        <div class="large-stat-card">
-            <div class="card__title--left">종합 공기질 지수 추천 (IAQ)</div>
-            <div class="large-stat-card__content">
-                <div class="stat-item stat-item--recommendation"><div class="stat-item__value" id="iaq_value">--</div><div class="stat-item__label">현재 CO2</div></div>
-                <div class="stat-item stat-item--recommendation"><div class="stat-item__value" id="temp_value">--</div><div class="stat-item__label">현재 온도</div></div>
-                <div class="stat-item"><div class="stat-item__value" id="final_recommendation">--</div></div>
+        <section class="stat-grid">
+            <div class="stat-card stat-card--pm10">
+                <div class="stat-card__icon">${ICONS.pm10}</div>
+                <div class="stat-card__label">PM10 · 미세먼지</div>
+                <div class="stat-card__value-row"><span class="stat-card__value" id="pm10_val">--</span><span class="stat-card__unit">µg/m³</span></div>
             </div>
-        </div>
+            <div class="stat-card stat-card--co2">
+                <div class="stat-card__icon">${ICONS.co2}</div>
+                <div class="stat-card__label">CO2 · 이산화탄소</div>
+                <div class="stat-card__value-row"><span class="stat-card__value" id="co2_val">--</span><span class="stat-card__unit">ppm</span></div>
+            </div>
+            <div class="stat-card stat-card--temp">
+                <div class="stat-card__icon">${ICONS.temp}</div>
+                <div class="stat-card__label">Temperature · 온도</div>
+                <div class="stat-card__value-row"><span class="stat-card__value" id="temp_val">--</span><span class="stat-card__unit">℃</span></div>
+            </div>
+            <div class="stat-card stat-card--pm25">
+                <div class="stat-card__icon">${ICONS.pm25}</div>
+                <div class="stat-card__label">PM2.5 · 초미세먼지</div>
+                <div class="stat-card__value-row"><span class="stat-card__value" id="pm25_val">--</span><span class="stat-card__unit">µg/m³</span></div>
+            </div>
+            <div class="stat-card stat-card--tvoc">
+                <div class="stat-card__icon">${ICONS.tvoc}</div>
+                <div class="stat-card__label">TVOC · 휘발성유기화합물</div>
+                <div class="stat-card__value-row"><span class="stat-card__value" id="tvoc_val">--</span><span class="stat-card__unit">ppb</span></div>
+            </div>
+            <div class="stat-card stat-card--humidity">
+                <div class="stat-card__icon">${ICONS.humidity}</div>
+                <div class="stat-card__label">Humidity · 습도</div>
+                <div class="stat-card__value-row"><span class="stat-card__value" id="hum_val">--</span><span class="stat-card__unit">%</span></div>
+            </div>
+        </section>
 
-        <div class="info-card">
-            <div class="card-content-wrapper">
-                <div class="bar-chart-container" id="live_bar_chart">
-                    <div class="card__title--left">실시간 미세먼지 농도 비교</div>
-                    <div class="bar-chart-visuals">
-                        <div class="bar-chart__bar-group"><div class="bar-chart__value" data-value-for="pm10">--</div><div class="bar-chart__bar" data-sensor="pm10" style="height: 0%;"></div><div class="bar-chart__label">${currentLocation} PM10</div></div>
-                        <div class="bar-chart__bar-group"><div class="bar-chart__value" data-value-for="asan_pm10" id="asan_pm10_val_chart">--</div><div class="bar-chart__bar" data-sensor="asan_pm10" style="height: 0%;"></div><div class="bar-chart__label">아산시 PM10</div></div>
-                        <div class="bar-chart__bar-group"><div class="bar-chart__value" data-value-for="pm25">--</div><div class="bar-chart__bar" data-sensor="pm25" style="height: 0%;"></div><div class="bar-chart__label">${currentLocation} PM25</div></div>
-                        <div class="bar-chart__bar-group"><div class="bar-chart__value" data-value-for="asan_pm25" id="asan_pm25_val_chart">--</div><div class="bar-chart__bar" data-sensor="asan_pm25" style="height: 0%;"></div><div class="bar-chart__label">아산시 PM25</div></div>
-                    </div>
+        <section class="summary-card">
+            <div class="summary-card__header">
+                <h3>종합 공기질 추천 (IAQ)</h3>
+                <p>CO2·온도 값을 기준으로 실내 환경 상태를 알려드립니다.</p>
+            </div>
+            <div class="summary-card__grid">
+                <div class="summary-item">
+                    <div class="summary-item__value" id="iaq_value">--</div>
+                    <div class="summary-item__label">현재 CO2 상태</div>
                 </div>
-
-                <div class="right-comparison-group">
-                    <div class="small-info-card"><div class="small-info-card__title">아산시 PM10</div><div class="small-info-card__content" id="asan_pm10">-- µg/m³</div></div>
-                    <div class="small-info-card"><div class="small-info-card__title">아산시 PM25</div><div class="small-info-card__content" id="asan_pm25">-- µg/m³</div></div>
-                    <div class="card__text-group" style="margin-top: 10px; align-self: center;">
-                        <div class="card__text--title">외부 공기질과 비교 분석</div>
-                        <div class="card__text--content">실내 환경 개선을 위한 맞춤형 정보 제공</div>
-                    </div>
+                <div class="summary-item">
+                    <div class="summary-item__value" id="temp_value">--</div>
+                    <div class="summary-item__label">현재 온도 상태</div>
+                </div>
+                <div class="summary-item summary-item--highlight">
+                    <div class="summary-item__value" id="final_recommendation">--</div>
+                    <div class="summary-item__label">종합 추천</div>
                 </div>
             </div>
-        </div>
-        <div style="height: 1500px;"></div>
+        </section>
+
+        <section class="compare-card">
+            <div class="compare-card__chart" id="live_bar_chart">
+                <h3>실내·실외 미세먼지 비교</h3>
+                <div class="bar-chart-visuals">
+                    <div class="bar-chart__bar-group"><div class="bar-chart__value" data-value-for="pm10">--</div><div class="bar-chart__bar" data-sensor="pm10" style="height: 0%;"></div><div class="bar-chart__label">${currentLocation}<br>PM10</div></div>
+                    <div class="bar-chart__bar-group"><div class="bar-chart__value" data-value-for="asan_pm10">--</div><div class="bar-chart__bar" data-sensor="asan_pm10" style="height: 0%;"></div><div class="bar-chart__label">아산시<br>PM10</div></div>
+                    <div class="bar-chart__bar-group"><div class="bar-chart__value" data-value-for="pm25">--</div><div class="bar-chart__bar" data-sensor="pm25" style="height: 0%;"></div><div class="bar-chart__label">${currentLocation}<br>PM25</div></div>
+                    <div class="bar-chart__bar-group"><div class="bar-chart__value" data-value-for="asan_pm25">--</div><div class="bar-chart__bar" data-sensor="asan_pm25" style="height: 0%;"></div><div class="bar-chart__label">아산시<br>PM25</div></div>
+                </div>
+            </div>
+
+            <div class="compare-card__side">
+                <div class="small-info-card"><div class="small-info-card__title">아산시 PM10</div><div class="small-info-card__content" id="asan_pm10">-- µg/m³</div></div>
+                <div class="small-info-card"><div class="small-info-card__title">아산시 PM25</div><div class="small-info-card__content" id="asan_pm25">-- µg/m³</div></div>
+                <p class="compare-card__note">외부 대기질과 비교해 실내 환기 시점을 판단해보세요.</p>
+            </div>
+        </section>
     `;
 
     setTimeout(() => {
@@ -338,35 +381,30 @@ function renderPredictDashboard() {
     setActiveButton(btnPredict);
 
     mainContent.innerHTML = `
-        <section class="section-header">
-            <img src="https://marketplace.canva.com/zDhug/MAGx1pzDhug/1/tl/canva-cartoon-illustration-of-happy-yellow-chick-MAGx1pzDhug.png" alt="대표 이미지" class="section-header__image"/>
-            <div class="section-header__text-group">
-                <div class="section-header__text--large">예측 정보</div>
-                <div class="section-header__text--medium">This is the prediction dashboard created using the same layout.</div>
-                <div class="section-header__text--small">AI 기반 데이터 예측 페이지</div>
+        <section class="page-header">
+            <div>
+                <h2 class="page-header__title">예측 정보</h2>
+                <p class="page-header__subtitle">AI 모델이 예측한 항목별 월간 추이를 확인하세요.</p>
             </div>
         </section>
 
-        <div class="prediction-list" style="margin-top: 40px;">
-            <div class="predict-buttons sensor-button-group">
-                <button class="text-btn active" data-sensor="pm10">PM10 예측</button>
-                <button class="text-btn" data-sensor="pm25">PM25 예측</button>
-                <button class="text-btn" data-sensor="co2">CO2 예측</button>
-                <button class="text-btn" data-sensor="tvoc">TVOC 예측</button>
-                <button class="text-btn" data-sensor="temp">온도 예측</button>
-                <button class="text-btn" data-sensor="humidity">습도 예측</button>
-            </div>
+        <div class="chip-row predict-buttons">
+            <button class="text-btn active" data-sensor="pm10">PM10</button>
+            <button class="text-btn" data-sensor="pm25">PM25</button>
+            <button class="text-btn" data-sensor="co2">CO2</button>
+            <button class="text-btn" data-sensor="tvoc">TVOC</button>
+            <button class="text-btn" data-sensor="temp">온도</button>
+            <button class="text-btn" data-sensor="humidity">습도</button>
+        </div>
 
-            <div class="info-card">
-                <div class="card__title--left" id="predict_card_title"></div>
-                <img src="" alt="예측 이미지" class="card__image--predict" id="predict_card_image"/>
-                <div class="card__text-group">
-                    <div class="card__text--title">AI기반 추천</div>
-                    <div class="card__text--content" id="predict_card_content"></div>
-                </div>
+        <div class="predict-card">
+            <h3 id="predict_card_title"></h3>
+            <img src="" alt="예측 이미지" class="predict-card__image" id="predict_card_image"/>
+            <div class="predict-card__footer">
+                <span class="predict-card__badge">AI 기반 추천</span>
+                <p id="predict_card_content"></p>
             </div>
         </div>
-        <div style="height: 150px;"></div>
     `;
 
     updatePredictionCard('pm10');
@@ -397,24 +435,21 @@ function renderAnalysisDashboard() {
     setActiveButton(btnAnalysis);
 
     mainContent.innerHTML = `
-        <section class="section-header">
-            <img src="https://marketplace.canva.com/zDhug/MAGx1pzDhug/1/tl/canva-cartoon-illustration-of-happy-yellow-chick-MAGx1pzDhug.png" alt="대표 이미지" class="section-header__image"/>
-            <div class="section-header__text-group">
-                <div class="section-header__text--large">분석 정보</div>
-                <div class="section-header__text--medium">This is the analysis dashboard created using the same layout.</div>
-                <div class="section-header__text--small">AI 기반 데이터 분석 페이지</div>
+        <section class="page-header">
+            <div>
+                <h2 class="page-header__title">데이터 분석</h2>
+                <p class="page-header__subtitle">기간별 추이를 다양한 관점에서 살펴보세요.</p>
             </div>
         </section>
 
-        <div class="analysis-buttons sensor-button-group" style="margin-top: 40px;">
+        <div class="chip-row analysis-buttons">
             <button class="text-btn active" data-file="page/co2_by_weekday.html">학기 별 CO2 분석</button>
             <button class="text-btn" data-file="page/term_indoor_conditions.html">학기 별 전체 값 분석</button>
             <button class="text-btn" data-file="page/temperature_vs_co2.html">온도/습도 분석</button>
             <button class="text-btn" data-file="page/indoor_vs_outdoor_pm10.html">내부/외부 미세먼지 분석</button>
         </div>
 
-        <iframe id="analysis_iframe" src="co2_by_weekday.html" style="width: 96%; height: 800px; border: none; margin-top: 20px;" title="Data Analysis Chart"></iframe>
-        <div style="height: 150px;"></div>
+        <iframe id="analysis_iframe" class="analysis-frame" src="co2_by_weekday.html" title="Data Analysis Chart"></iframe>
     `;
 
     const iframe = document.getElementById('analysis_iframe');
@@ -441,8 +476,8 @@ const locationButtons = document.querySelectorAll('.submenu__btn');
 locationButtons.forEach(button => {
     button.addEventListener('click', function() {
         const targetLocation = this.dataset.location;
-        
-        // 🚀 [추가] 준비중인 페이지이거나 데이터가 없는 버튼 처리
+
+        // 준비중인 페이지이거나 데이터가 없는 버튼 처리
         if (!targetLocation || this.textContent.includes('준비중')) {
             console.log("준비 중인 페이지입니다.");
             return;
@@ -452,10 +487,10 @@ locationButtons.forEach(button => {
         locationButtons.forEach(btn => btn.classList.remove('active'));
         this.classList.add('active');
 
-        // 🚀 [추가] 현재 위치 변경, 캐시 초기화 및 새로운 방 데이터 즉시 반영
+        // 현재 위치 변경, 캐시 초기화 및 새로운 방 데이터 즉시 반영
         currentLocation = targetLocation;
         cachedSensorData = null; // 이전 방 캐시 비우기
-        
+
         console.log(`현재 선택된 위치 변경: ${currentLocation}`);
 
         // 실시간 뷰 레이아웃 상태를 유지한 채 선택된 방 데이터로 갱신
