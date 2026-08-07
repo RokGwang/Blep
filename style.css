@@ -259,6 +259,11 @@ button { font-family: inherit; }
   transition: margin-left 0.25s ease;
 }
 
+/* 사이드바가 닫혔을 때 React state(sidebarHidden)로 토글되는 클래스 */
+.main-content.main-content--full {
+  margin-left: 0;
+}
+
 /* Page header */
 .page-header {
   display: flex;

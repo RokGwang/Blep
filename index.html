@@ -9,66 +9,18 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header class="header" id="siteHeader">
-    <div class="header__spectrum" aria-hidden="true"></div>
-    <div class="header__inner">
-      <div class="header__brand">
-        <span class="header__brand-mark">K</span>
-        <div class="header__brand-text">
-          <strong>K-Tennis</strong>
-          <span>실내 공기질 모니터링</span>
-        </div>
-      </div>
+  <div id="root"></div>
 
-      <nav class="header__nav main-buttons" aria-label="주요 메뉴">
-        <button class="text-btn main-buttons__btn active" id="btn_live">실시간</button>
-        <button class="text-btn main-buttons__btn" id="btn_predict">예측</button>
-        <button class="text-btn main-buttons__btn" id="btn_analysis">데이터 분석</button>
-      </nav>
+  <!--
+    React 18 + Babel standalone (CDN)
+    별도 빌드 도구(Webpack/Vite) 없이, 브라우저가 JSX를 그 자리에서 바로 해석합니다.
+    기존과 동일하게 index.html / style.css / script.js 3개 파일 구조를 유지하기 위한 선택입니다.
+    (참고: 트래픽이 커지면 Babel의 실시간 변환 비용 때문에 Vite 등 빌드 도구 전환을 권장합니다.)
+  -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js" crossorigin></script>
 
-      <div class="header__meta">
-        <span class="header__clock" id="currentTime">--:--:--</span>
-        <div class="menu-toggle" id="menuToggle" role="button" tabindex="0" aria-label="사이드바 열기/닫기">
-          <div class="menu-toggle__bar"></div>
-          <div class="menu-toggle__bar"></div>
-          <div class="menu-toggle__bar"></div>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <nav class="sidebar" id="sideNav" aria-label="강의실 선택">
-    <ul class="sidebar__menu">
-      <li class="menu-group">
-        <div class="menu-group__title">멀티미디어</div>
-        <ul class="submenu">
-          <li><button class="submenu__btn" data-location="M501">M501</button></li>
-          <li><button class="submenu__btn active" data-location="M502">M502</button></li>
-          <li><button class="submenu__btn" data-location="M507">M507</button></li>
-          <li><button class="submenu__btn" data-location="M520">M520</button></li>
-        </ul>
-      </li>
-      <li class="menu-group">
-        <div class="menu-group__title">의료과학관</div>
-        <ul class="submenu">
-          <li><button class="submenu__btn submenu__btn--soon">1502 <span class="submenu__tag">준비중</span></button></li>
-          <li><button class="submenu__btn submenu__btn--soon">1504 <span class="submenu__tag">준비중</span></button></li>
-          <li><button class="submenu__btn submenu__btn--soon">1506 <span class="submenu__tag">준비중</span></button></li>
-        </ul>
-      </li>
-      <li class="menu-group">
-        <div class="menu-group__title">미디어랩스</div>
-        <ul class="submenu">
-          <li><button class="submenu__btn submenu__btn--soon">ML416 <span class="submenu__tag">준비중</span></button></li>
-          <li><button class="submenu__btn submenu__btn--soon">ML417 <span class="submenu__tag">준비중</span></button></li>
-          <li><button class="submenu__btn submenu__btn--soon">ML418 <span class="submenu__tag">준비중</span></button></li>
-        </ul>
-      </li>
-    </ul>
-  </nav>
-
-  <main class="main-content" id="mainContent"></main>
-
-  <script src="script.js"></script>
+  <script type="text/babel" src="script.js"></script>
 </body>
 </html>
