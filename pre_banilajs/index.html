@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>K-Tennis · 실내 공기질 대시보드</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="root"></div>
+
+  <!--
+    React 18 + Babel standalone (CDN)
+    별도 빌드 도구(Webpack/Vite) 없이, 브라우저가 JSX를 그 자리에서 바로 해석합니다.
+    기존과 동일하게 index.html / style.css / script.js 3개 파일 구조를 유지하기 위한 선택입니다.
+    (참고: 트래픽이 커지면 Babel의 실시간 변환 비용 때문에 Vite 등 빌드 도구 전환을 권장합니다.)
+  -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js" crossorigin></script>
+
+  <script type="text/babel" src="script.js"></script>
+</body>
+</html>
